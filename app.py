@@ -6,33 +6,32 @@ import time
 st.set_page_config(
     page_title="English to Spanish Neural Translator",
     page_icon="🌍",
-    layout="centered"
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for better UI
+# Custom CSS for better styling
 st.markdown("""
-<style>
-    .main-header {
-        text-align: center;
-        color: #1f77b4;
-        font-size: 2.5em;
+    <style>
+    .main {
+        padding: 2rem;
+    }
+    .stButton>button {
+        width: 100%;
+        background-color: #FF4B4B;
+        color: white;
         font-weight: bold;
-        margin-bottom: 0.5em;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
     }
-    .sub-header {
-        text-align: center;
-        color: #555;
-        font-size: 1.2em;
-        margin-bottom: 2em;
-    }
-</style>
-""", unsafe_allow_html=True)
+    </style>
+    """, unsafe_allow_html=True)
 
 @st.cache_resource
 def load_marianmt_model():
-    """Load MarianMT model (cached for performance)"""
+    """Load MarianMT model and tokenizer (cached for performance)"""
     try:
-        with st.spinner("🔄 Loading translation model..."):
+        with st.spinner("Loading translation model..."):
             model_name = "Helsinki-NLP/opus-mt-en-es"
             tokenizer = MarianTokenizer.from_pretrained(model_name)
             model = MarianMTModel.from_pretrained(model_name)
@@ -52,9 +51,9 @@ def translate_text(text, tokenizer, model):
 
 def main():
     # Header
-    st.markdown('<div class="main-header">🌍 English to Spanish Neural Translator</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-header">Powered by MarianMT Transformer Architecture</div>', unsafe_allow_html=True)
-    st.markdown("**Developed by:** Vasu Chakravarthi Jaladi | BTech AIML, SRKR Engineering College")
+    st.title("🌍 English to Spanish Neural Translator")
+    st.markdown("### Powered by MarianMT Transformer Architecture")
+    st.markdown("*Built by Vasu Chakravarthi Jaladi - SRKR Engineering College*")
     
     # Load model
     tokenizer, model = load_marianmt_model()
@@ -63,163 +62,137 @@ def main():
         st.error("❌ Failed to load translation model. Please refresh the page.")
         st.stop()
     
-    st.success("✅ MarianMT translation model loaded successfully!")
+    st.success("✅ MarianMT model loaded successfully!")
     
-    # Create tabs for different sections
-    tab1, tab2, tab3 = st.tabs(["🔄 Translate", "📊 Model Info", "ℹ️ About"])
+    # Main content
+    st.markdown("---")
+    st.markdown("## 📝 Enter Text to Translate")
+    
+    # Create tabs for different input methods
+    tab1, tab2 = st.tabs(["✍️ Type Your Text", "📋 Try Examples"])
     
     with tab1:
-        st.markdown("## 📝 Enter English Text to Translate")
-        
-        # Text input
         user_input = st.text_area(
-            "English sentence:",
-            placeholder="Type your English sentence here...",
-            height=120,
-            help="Enter any English text to translate to Spanish"
+            "English Text:",
+            placeholder="Type or paste your English text here...",
+            height=150,
+            key="user_text"
         )
-        
-        # Example sentences
-        st.markdown("### 💡 Try these examples:")
+    
+    with tab2:
         example_sentences = [
             "Hello, how are you doing today?",
-            "I am very happy to meet you.",
+            "I am very happy to see you.",
             "Where is the nearest restaurant?",
             "Thank you for your help and support.",
             "I want to learn Spanish language.",
             "The weather is beautiful today.",
-            "Can you help me find the library?",
+            "Can you help me with this problem?",
             "I love traveling to new places.",
-            "What time does the store close?",
-            "This is an amazing experience."
+            "What time does the train arrive?",
+            "Please call me when you are free."
         ]
         
-        col1, col2 = st.columns(2)
-        with col1:
-            for i in range(0, len(example_sentences), 2):
-                if st.button(f"📌 {example_sentences[i][:30]}...", key=f"ex_{i}"):
-                    user_input = example_sentences[i]
+        selected_example = st.selectbox(
+            "Choose an example sentence:",
+            [""] + example_sentences,
+            key="example_select"
+        )
         
-        with col2:
-            for i in range(1, len(example_sentences), 2):
-                if st.button(f"📌 {example_sentences[i][:30]}...", key=f"ex_{i}"):
-                    user_input = example_sentences[i]
-        
-        st.markdown("---")
-        
-        # Translation button
-        if st.button("🔄 Translate to Spanish", type="primary", use_container_width=True):
-            if user_input and user_input.strip():
-                with st.spinner("🔄 Translating..."):
-                    start_time = time.time()
-                    translation = translate_text(user_input, tokenizer, model)
-                    end_time = time.time()
-                
-                # Display results
-                st.markdown("## 🎯 Translation Result")
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.markdown("**🇺🇸 English Input:**")
-                    st.info(user_input)
-                
-                with col2:
-                    st.markdown("**🇪🇸 Spanish Translation:**")
-                    st.success(translation)
-                
-                # Show translation time and stats
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("⏱️ Time", f"{end_time - start_time:.2f}s")
-                with col2:
-                    st.metric("📝 Words", len(user_input.split()))
-                with col3:
-                    st.metric("📊 Characters", len(user_input))
-                
-            else:
-                st.warning("⚠️ Please enter some text to translate.")
+        if selected_example:
+            user_input = selected_example
+            st.text_area("Selected Example:", value=selected_example, height=100, disabled=True)
     
-    with tab2:
-        st.markdown("## 📊 Model Information")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("### 🤖 Architecture")
-            st.write("**Model:** Helsinki-NLP MarianMT")
-            st.write("**Type:** Transformer (Encoder-Decoder)")
-            st.write("**Language Pair:** English → Spanish")
-            st.write("**Parameters:** ~74M")
+    # Translation button
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        translate_button = st.button("🔄 Translate to Spanish", type="primary", use_container_width=True)
+    
+    # Perform translation
+    if translate_button:
+        if user_input and user_input.strip():
+            with st.spinner("Translating..."):
+                start_time = time.time()
+                translation = translate_text(user_input, tokenizer, model)
+                end_time = time.time()
+                translation_time = end_time - start_time
             
-        with col2:
-            st.markdown("### 📈 Performance")
-            st.write("**BLEU Score:** 51.03")
-            st.write("**Quality:** Near-human")
-            st.write("**Speed:** ~0.28s per sentence")
-            st.write("**Grade:** A+ (Excellent)")
-        
-        st.markdown("---")
-        st.markdown("### 🎯 Performance Comparison")
-        
-        comparison_data = {
-            "Metric": ["BLEU Score", "Quality Level", "Speed", "Training Required"],
-            "Previous LSTM": ["45.18", "Commercial-grade", "~2.0s", "Yes (2.5 hours)"],
-            "Current MarianMT": ["51.03", "Near-human", "~0.28s", "No (Pre-trained)"]
-        }
-        
-        st.table(comparison_data)
-        
-        st.markdown("### 💡 Key Features")
-        st.markdown("""
-        - ✅ **State-of-the-art Translation**: Transformer-based architecture
-        - ✅ **No Fine-tuning Needed**: Pre-trained on millions of sentences
-        - ✅ **Fast Inference**: 7x faster than LSTM models
-        - ✅ **High Accuracy**: 51.03 BLEU score (near-human quality)
-        - ✅ **Production-ready**: Optimized for real-world use
-        """)
+            # Display results
+            st.markdown("---")
+            st.markdown("## 🎯 Translation Result")
+            
+            # Create two columns for input and output
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("**🇺🇸 English Input:**")
+                st.info(user_input)
+            
+            with col2:
+                st.markdown("**🇪🇸 Spanish Translation:**")
+                st.success(translation)
+            
+            # Show metrics
+            st.markdown("---")
+            metric_col1, metric_col2, metric_col3 = st.columns(3)
+            
+            with metric_col1:
+                st.metric("Input Words", len(user_input.split()))
+            
+            with metric_col2:
+                st.metric("Output Words", len(translation.split()))
+            
+            with metric_col3:
+                st.metric("Time", f"{translation_time:.2f}s")
+            
+        else:
+            st.warning("⚠️ Please enter some text to translate.")
     
-    with tab3:
-        st.markdown("## ℹ️ About This Project")
-        
+    # Footer with model information
+    st.markdown("---")
+    st.markdown("### 📊 Model Information")
+    
+    info_col1, info_col2, info_col3, info_col4 = st.columns(4)
+    
+    with info_col1:
+        st.metric("Model", "MarianMT")
+    
+    with info_col2:
+        st.metric("Architecture", "Transformer")
+    
+    with info_col3:
+        st.metric("BLEU Score", "51.03")
+    
+    with info_col4:
+        st.metric("Quality", "A+")
+    
+    # Additional info in expander
+    with st.expander("ℹ️ About This Project"):
         st.markdown("""
-        ### 🎓 Academic Project
-        This is a neural machine translation system developed as part of an academic project 
-        at SRKR Engineering College, Bhimavaram.
+        **English to Spanish Neural Machine Translation**
         
-        ### 🧠 Technology Stack
-        - **Framework:** Hugging Face Transformers
-        - **Model:** Helsinki-NLP MarianMT
-        - **Deployment:** Streamlit Cloud
-        - **Language:** Python 3.8+
+        This application uses the Helsinki-NLP MarianMT model, a state-of-the-art 
+        transformer-based neural machine translation system specifically optimized 
+        for English to Spanish translation.
         
-        ### 👨‍💻 Developer
-        **Name:** Vasu Chakravarthi Jaladi  
-        **Program:** BTech AIML (3rd Year)  
+        **Key Features:**
+        - ✅ Near-human translation quality (BLEU: 51.03)
+        - ✅ Fast inference (~0.3 seconds per sentence)
+        - ✅ Production-ready transformer architecture
+        - ✅ No training required - pre-trained on millions of sentences
+        
+        **Technology Stack:**
+        - Framework: Streamlit
+        - Model: Helsinki-NLP/opus-mt-en-es
+        - Architecture: Transformer (Encoder-Decoder)
+        - Deployment: Streamlit Cloud
+        
+        **Developed by:** Vasu Chakravarthi Jaladi  
         **Institution:** SRKR Engineering College, Bhimavaram  
-        **Graduation:** 2027
+        **Course:** BTech AIML (3rd Year)
         
-        ### 📊 Project Achievements
-        - 🏆 BLEU Score: 51.03 (Near-human quality)
-        - ⚡ 13% improvement over previous LSTM model
-        - 🚀 7x faster inference speed
-        - 💻 Production-ready deployment
-        
-        ### 📄 License
-        This project is licensed under the MIT License.
-        
-        ### 🔗 Links
-        - [GitHub Repository](https://github.com/vasuchakravarthi/English-Spanish-Neural-Translator)
-        - [LinkedIn](https://linkedin.com/in/vasuchakravarthi)
-        
-        ### 🙏 Acknowledgments
-        - Helsinki-NLP for the MarianMT model
-        - Hugging Face for the Transformers library
-        - Streamlit for the deployment platform
+        **GitHub:** [MarianMT-Translator](https://github.com/vasuchakravarthi/MarianMT-Translator)
         """)
-        
-        st.markdown("---")
-        st.markdown("⭐ **If you found this helpful, please star the repository!**")
 
 if __name__ == "__main__":
     main()
