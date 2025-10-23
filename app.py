@@ -53,7 +53,7 @@ def main():
     # Header
     st.title("🌍 English to Spanish Neural Translator")
     st.markdown("### Powered by MarianMT Transformer Architecture")
-    st.markdown("*Built by Vasu Chakravarthi Jaladi - SRKR Engineering College*")
+    st.markdown("*Built by Vasu Chakravarthi Jaladi*")
     
     # Load model
     tokenizer, model = load_marianmt_model()
@@ -187,9 +187,6 @@ def main():
         - Architecture: Transformer (Encoder-Decoder)
         - Deployment: Streamlit Cloud
         
-        **Developed by:** Vasu Chakravarthi Jaladi  
-        **Institution:** SRKR Engineering College, Bhimavaram  
-        **Course:** BTech AIML (3rd Year)
         
         **GitHub:** [MarianMT-Translator](https://github.com/vasuchakravarthi/MarianMT-Translator)
         """)
